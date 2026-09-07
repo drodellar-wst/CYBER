@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HERMES Invaders — Académie de gestion de projet</title>
+  <style>
+    :root { --ink:#061327; --panel:#0a1d38; --blue:#39c6ff; --mint:#55f2bd; --amber:#ffc857; --text:#edf7ff; --muted:#a9c2dc; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:22px; color:var(--text); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(circle at 20% 20%,#153e72 0,transparent 28%),radial-gradient(circle at 85% 82%,#174c60 0,transparent 24%),var(--ink); }
+    .app { width:min(100%,980px); display:grid; grid-template-columns:minmax(0,1fr) 260px; overflow:hidden; border:1px solid #31547d; border-radius:24px; background:#071a32; box-shadow:0 28px 80px #0009; }
+    main { position:relative; min-height:660px; padding:25px; background:linear-gradient(180deg,#0b2444dd,#07162bdd); }
+    .eyebrow { margin:0 0 6px; color:var(--mint); font-size:.73rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+    h1 { margin:0; font-size:clamp(1.65rem,4vw,2.45rem); letter-spacing:-.045em; }
+    .subtitle { margin:7px 0 20px; color:var(--muted); font-size:.95rem; }
+    #game { display:block; width:100%; max-width:650px; aspect-ratio:13 / 11; margin:auto; border:1px solid #396080; border-radius:14px; background:#030b19; touch-action:none; }
+    .controls { margin:14px 0 0; text-align:center; color:var(--muted); font-size:.84rem; }
+    kbd { padding:2px 6px; border-radius:5px; border:1px solid #52708f; background:#142d4b; color:white; font:inherit; }
+    aside { padding:28px 24px; background:linear-gradient(180deg,#0e2a4e,#081d36); border-left:1px solid #31547d; }
+    .brand { display:flex; align-items:center; gap:8px; margin-bottom:37px; color:white; font-weight:850; letter-spacing:.09em; }
+    .brand i { width:11px; height:11px; display:inline-block; background:var(--mint); border-radius:50%; box-shadow:0 0 16px var(--mint); }
+    .stat { padding:16px 0; border-top:1px solid #2c4d70; }
+    .stat:last-of-type { border-bottom:1px solid #2c4d70; }
+    .stat span { display:block; color:var(--muted); font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.11em; }
+    .stat strong { display:block; margin-top:5px; font-size:1.7rem; letter-spacing:-.05em; }
+    .legend { margin-top:30px; font-size:.84rem; line-height:1.5; color:var(--muted); }
+    .legend b { color:var(--text); }
+    .reset { width:100%; margin-top:25px; padding:11px 14px; border:1px solid #557a9f; border-radius:9px; color:white; font:inherit; font-weight:750; background:#153b64; cursor:pointer; }
+    .reset:hover { background:#1a4b7c; }
+    .overlay { position:absolute; inset:0; z-index:3; display:grid; place-items:center; padding:25px; background:#061327e8; backdrop-filter:blur(8px); }
+    .overlay[hidden] { display:none; }
+    .card { width:min(100%,590px); padding:clamp(22px,5vw,38px); border:1px solid #3c648a; border-radius:18px; background:linear-gradient(145deg,#14385e,#0c2341); box-shadow:0 18px 60px #000b; }
+    .badge { display:inline-block; padding:5px 9px; border-radius:999px; color:#062217; background:var(--mint); font-size:.72rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+    .card h2 { margin:13px 0 8px; font-size:clamp(1.45rem,4vw,2rem); letter-spacing:-.04em; }
+    .card p { line-height:1.5; color:#d7e8f7; }
+    .choices { display:grid; gap:10px; margin-top:20px; }
+    .choice { width:100%; padding:13px 14px; border:1px solid #456b91; border-radius:10px; background:#102d4e; color:white; text-align:left; font:inherit; line-height:1.35; cursor:pointer; transition:.15s ease; }
+    .choice:hover:not(:disabled) { transform:translateY(-1px); border-color:var(--blue); background:#17416e; }
+    .choice:disabled { cursor:default; }
+    .choice.good { border-color:var(--mint); background:#164d43; }
+    .choice.bad { border-color:#ff7373; background:#572d3b; }
+    .feedback { min-height:25px; margin:16px 0 0; color:var(--mint); font-weight:700; }
+    .next, .start { margin-top:12px; padding:12px 17px; border:0; border-radius:9px; background:var(--mint); color:#062217; font:inherit; font-weight:850; cursor:pointer; }
+    .next[hidden] { display:none; }
+    .start { width:100%; font-size:1rem; }
+    .final-score { font-size:4rem; color:var(--mint); font-weight:900; letter-spacing:-.09em; margin:5px 0 10px; }
+    @media (max-width:760px) { .app { grid-template-columns:1fr; } main { min-height:600px; } aside { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:18px 22px; border-left:0; border-top:1px solid #31547d; } .brand,.legend,.reset { display:none; } .stat { padding:0; border:0 !important; } .stat strong { font-size:1.3rem; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <main>
+      <p class="eyebrow">Académie Project Management</p><h1>HERMES Invaders</h1>
+      <p class="subtitle">Détruisez les blocs envahisseurs et validez vos connaissances HERMES.</p>
+      <canvas id="game" width="650" height="550" aria-label="Jeu HERMES Invaders"></canvas>
+      <p class="controls"><kbd>←</kbd> <kbd>→</kbd> ou <kbd>A</kbd> <kbd>D</kbd> pour bouger · <kbd>Espace</kbd> pour tirer</p>
+      <div class="overlay" id="overlay"><div class="card" id="modal"></div></div>
+    </main>
+    <aside>
+      <div class="brand"><i></i> HERMES / 5</div>
+      <div class="stat"><span>Questions</span><strong id="progress">0 / 10</strong></div>
+      <div class="stat"><span>Réponses justes</span><strong id="score">0</strong></div>
+      <div class="stat"><span>Mission</span><strong id="mission">Prêt</strong></div>
+      <p class="legend"><b>Objectif :</b> répondez à 10 questions tirées aléatoirement d'une banque de 30. Une réponse est donnée après chaque bloc touché.</p>
+      <button class="reset" id="reset">Recommencer</button>
+    </aside>
+  </div>
+<script>
+(() => {
+  const bank = [
+    ['Quel est l’objectif principal de HERMES ?', 'Remplacer toute communication par des formulaires.', 'Fournir une méthode uniforme pour piloter des projets.', 'Garantir automatiquement le succès de tout projet.', 1],
+    ['À qui HERMES s’adresse-t-il ?', 'Uniquement aux développeurs de logiciels.', 'Aux organisations qui conduisent des projets, surtout dans l’administration publique.', 'Seulement aux chefs de projet externes.', 1],
+    ['Que structure HERMES dans un projet ?', 'Les rôles, résultats, tâches et décisions.', 'Uniquement le budget annuel.', 'La liste des congés de l’équipe.', 0],
+    ['Quelle est la bonne description d’un module HERMES ?', 'Une phase obligatoire identique pour tous les projets.', 'Un ensemble de contenus adaptable au type de projet.', 'Un logiciel de planification payant.', 1],
+    ['Pourquoi adapter HERMES au projet ?', 'Pour supprimer les décisions de pilotage.', 'Pour ajuster la méthode à la situation, aux risques et à la taille du projet.', 'Pour éviter de documenter le projet.', 1],
+    ['Quel rôle commande le projet et assume sa réussite du point de vue du mandant ?', 'Le responsable de l’application.', 'Le chef de projet.', 'Le mandant.', 2],
+    ['Quelle est une responsabilité essentielle du chef de projet ?', 'Diriger et coordonner le projet dans le cadre du mandat.', 'Approuver seul les budgets de l’organisation.', 'Remplacer systématiquement le mandant.', 0],
+    ['Que contient typiquement un mandat de projet ?', 'Le but, le cadre et les attentes du projet.', 'Seulement les noms des participants.', 'Uniquement le code source du produit.', 0],
+    ['À quoi sert une décision de jalon ?', 'À valider la suite du projet sur la base des résultats obtenus.', 'À choisir la couleur des documents.', 'À annuler automatiquement les risques.', 0],
+    ['Que désigne un résultat dans HERMES ?', 'Un livrable ou un état à produire et à valider.', 'Une discussion informelle sans trace.', 'Une estimation non vérifiée.', 0],
+    ['Quel est le bon réflexe face à un risque ?', 'L’identifier, l’évaluer, le traiter et le surveiller.', 'Attendre qu’il se réalise avant d’agir.', 'Le retirer du rapport pour ne pas inquiéter.', 0],
+    ['Quel énoncé distingue le mieux un risque d’un problème ?', 'Un risque est futur et incertain; un problème est déjà présent.', 'Un risque est toujours moins important qu’un problème.', 'Ils désignent exactement la même chose.', 0],
+    ['Pourquoi gérer les parties prenantes ?', 'Pour comprendre leurs attentes et favoriser l’adhésion au projet.', 'Pour les exclure des décisions.', 'Pour déléguer toutes les responsabilités au chef de projet.', 0],
+    ['Quel est le rôle de l’organisation de projet ?', 'Définir clairement responsabilités, compétences et voies de décision.', 'Remplacer le contenu fonctionnel du projet.', 'Limiter les échanges entre rôles.', 0],
+    ['À quoi sert la planification du projet ?', 'À ordonner les travaux, ressources, délais et dépendances.', 'À figer toute adaptation dès le premier jour.', 'À éviter d’estimer les efforts.', 0],
+    ['Quel est un usage correct du contrôle de projet ?', 'Comparer régulièrement avancement réel et planifié pour décider des mesures.', 'Mesurer uniquement la présence aux réunions.', 'Reporter tous les écarts à la clôture.', 0],
+    ['Quand la gestion de la qualité intervient-elle ?', 'Tout au long du projet, avec des critères de qualité définis.', 'Seulement après la mise en production.', 'Uniquement lorsqu’un client se plaint.', 0],
+    ['Quel est le but de la gestion des changements ?', 'Évaluer, décider et tracer les demandes qui modifient le projet.', 'Accepter immédiatement chaque demande.', 'Interdire toute évolution nécessaire.', 0],
+    ['Que doit permettre une communication de projet ?', 'Une information ciblée, compréhensible et au bon moment.', 'La diffusion des mêmes détails à tout le monde sans distinction.', 'L’absence de compte rendu.', 0],
+    ['Quel élément aide à assurer la traçabilité des décisions ?', 'Une documentation claire des décisions et de leurs bases.', 'Des consignes uniquement orales.', 'La suppression des anciennes versions.', 0],
+    ['Que vise la phase d’initialisation ?', 'Clarifier le mandat, l’organisation et les fondations du projet.', 'Livrer directement le produit final.', 'Clôturer les contrats avant toute analyse.', 0],
+    ['Que doit être la mise en service d’une solution ?', 'Préparée, coordonnée et accompagnée selon les besoins.', 'Improvisée après la clôture administrative.', 'Effectuée uniquement par le mandant.', 0],
+    ['Pourquoi réaliser une clôture de projet ?', 'Pour formaliser l’achèvement, capitaliser l’expérience et transférer les responsabilités.', 'Pour effacer les documents dès la livraison.', 'Pour démarrer un nouveau projet sans bilan.', 0],
+    ['À quoi sert la capitalisation des expériences ?', 'À améliorer les projets futurs grâce aux enseignements tirés.', 'À éviter toute évolution de la méthode.', 'À remplacer le contrôle des risques.', 0],
+    ['Quelle affirmation sur HERMES est juste ?', 'La méthode peut être utilisée pour différents types de projets grâce à ses scénarios.', 'Elle ne fonctionne que pour les projets de construction.', 'Elle impose la même charge documentaire dans tous les cas.', 0],
+    ['Qu’est-ce qu’un scénario HERMES ?', 'Une configuration de la méthode adaptée à une situation de projet.', 'Un exercice fictif sans lien avec la méthode.', 'Un diagramme uniquement destiné au budget.', 0],
+    ['Quel comportement soutient une bonne gouvernance ?', 'Des décisions prises par les rôles compétents et documentées.', 'Des responsabilités volontairement ambiguës.', 'Le contournement des instances de décision.', 0],
+    ['Quel est le rôle du mandat dans le pilotage ?', 'Il donne la légitimité et le cadre nécessaires pour conduire le projet.', 'Il remplace le plan de projet détaillé dans tous les cas.', 'Il est facultatif dès qu’une équipe est motivée.', 0],
+    ['Que cherche la gestion des bénéfices ?', 'S’assurer que les effets utiles attendus du projet sont poursuivis.', 'Se limiter à livrer une fonctionnalité, sans considérer son utilité.', 'Évaluer uniquement le nombre de réunions.', 0],
+    ['Quelle approche HERMES est la plus appropriée ?', 'Appliquer les éléments requis et utiles de manière proportionnée.', 'Utiliser chaque document possible sans tenir compte du contexte.', 'Ignorer la méthode pour gagner du temps.', 0]
+  ];
+  const canvas = document.querySelector('#game'), ctx = canvas.getContext('2d');
+  const overlay = document.querySelector('#overlay'), modal = document.querySelector('#modal');
+  const scoreEl = document.querySelector('#score'), progressEl = document.querySelector('#progress'), missionEl = document.querySelector('#mission');
+  let keys={}, ship, bullets, enemies, stars, selected, question=0, score=0, paused=true, animation;
+  const shuffle = a => [...a].sort(()=>Math.random()-.5);
+  function resetGame() { cancelAnimationFrame(animation); selected=shuffle(bank).slice(0,10); question=score=0; ship={x:305,y:493,w:40}; bullets=[]; enemies=makeEnemies(); stars=Array.from({length:72},()=>({x:Math.random()*650,y:Math.random()*550,r:Math.random()*1.6+.3})); paused=true; scoreEl.textContent='0'; progressEl.textContent='0 / 10'; missionEl.textContent='Prêt'; intro(); draw(); }
+  function makeEnemies(){ return Array.from({length:30},(_,i)=>({x:74+(i%6)*93,y:82+Math.floor(i/6)*48,w:34,h:25,live:true,dx:1})); }
+  function intro(){ overlay.hidden=false; modal.innerHTML='<span class="badge">Mission de validation</span><h2>Prêt pour l’invasion ?</h2><p>Déplacez votre vaisseau, tirez sur un bloc puis répondez à une question HERMES. Après 10 réponses, votre niveau est validé à partir de <b>9/10</b>.</p><button class="start">Démarrer la mission</button>'; modal.querySelector('button').onclick=()=>{overlay.hidden=true; paused=false; missionEl.textContent='En cours'; loop();}; }
+  function draw(){ ctx.clearRect(0,0,650,550); ctx.fillStyle='#030b19';ctx.fillRect(0,0,650,550); stars.forEach(s=>{ctx.fillStyle='#bce5ff';ctx.globalAlpha=.35+s.r/3;ctx.fillRect(s.x,s.y,s.r,s.r);});ctx.globalAlpha=1;
+    enemies.forEach(e=>{if(!e.live)return;ctx.fillStyle='#39c6ff';ctx.fillRect(e.x,e.y,e.w,e.h);ctx.fillStyle='#071a32';ctx.fillRect(e.x+6,e.y+6,7,7);ctx.fillRect(e.x+21,e.y+6,7,7);ctx.fillStyle='#55f2bd';ctx.fillRect(e.x+9,e.y+17,16,3);});
+    bullets.forEach(b=>{ctx.fillStyle='#ffc857';ctx.fillRect(b.x,b.y,4,12);});ctx.fillStyle='#55f2bd';ctx.beginPath();ctx.moveTo(ship.x+20,ship.y-16);ctx.lineTo(ship.x+40,ship.y+22);ctx.lineTo(ship.x,ship.y+22);ctx.closePath();ctx.fill();ctx.fillStyle='#dffff3';ctx.fillRect(ship.x+17,ship.y-5,6,14);
+  }
+  function loop(){ if(paused)return; if(keys.ArrowLeft||keys.a||keys.A) ship.x=Math.max(0,ship.x-5); if(keys.ArrowRight||keys.d||keys.D)ship.x=Math.min(610,ship.x+5); bullets.forEach(b=>b.y-=8);bullets=bullets.filter(b=>b.y>-14); let hit=false;
+    for(const b of bullets)for(const e of enemies)if(e.live&&b.x>e.x&&b.x<e.x+e.w&&b.y<e.y+e.h&&b.y+12>e.y){e.live=false;b.y=-30;hit=true;break;} if(hit) ask(); draw(); animation=requestAnimationFrame(loop); }
+  function fire(){if(!paused&&bullets.length<3)bullets.push({x:ship.x+18,y:ship.y-12});}
+  function ask(){paused=true; question++; progressEl.textContent=`${question} / 10`; const q=selected[question-1], order=shuffle([0,1,2]); overlay.hidden=false; modal.innerHTML=`<span class="badge">Question ${question} / 10</span><h2>${q[0]}</h2><div class="choices">${order.map(i=>`<button class="choice" data-i="${i}">${q[i+1]}</button>`).join('')}</div><p class="feedback"></p><button class="next" hidden>${question===10?'Voir mon résultat':'Continuer la mission'}</button>`;
+    const feedback=modal.querySelector('.feedback'), next=modal.querySelector('.next'); modal.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{let choice=+btn.dataset.i, good=choice===q[4];modal.querySelectorAll('.choice').forEach(x=>{x.disabled=true;if(+x.dataset.i===q[4])x.classList.add('good');});if(!good)btn.classList.add('bad');if(good){score++;scoreEl.textContent=score;feedback.textContent='Exact ! Votre savoir-faire progresse.';}else feedback.textContent='Pas tout à fait. La bonne réponse est mise en évidence.';next.hidden=false;}); next.onclick=()=>question===10?finish():resume(); }
+  function resume(){overlay.hidden=true;paused=false;if(!enemies.some(e=>e.live))enemies=makeEnemies();loop();}
+  function finish(){missionEl.textContent='Terminée';let valid=score>8;modal.innerHTML=`<span class="badge">Mission terminée</span><div class="final-score">${score}/10</div><h2>${valid?'Skills validated':'Continuez à vous entraîner'}</h2><p>${valid?'Excellente maîtrise de la méthode HERMES !':'Il faut plus de 8 bonnes réponses pour valider vos compétences. Relancez une mission pour progresser.'}</p><button class="start">Nouvelle mission</button>`;modal.querySelector('button').onclick=resetGame;}
+  addEventListener('keydown',e=>{keys[e.key]=true;if(e.code==='Space'){e.preventDefault();fire();}});addEventListener('keyup',e=>keys[e.key]=false); canvas.addEventListener('pointerdown',fire);document.querySelector('#reset').onclick=resetGame;resetGame();
+})();
+</script>
+</body>
+</html>
